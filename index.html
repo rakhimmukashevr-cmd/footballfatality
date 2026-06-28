@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Угадай футболиста | MVP</title>
+        <style>
+        :root {
+            --dark-bg: #0f0f0f;
+            --card-inner: rgba(26, 26, 26, 0.9); /* Сделал чуть прозрачным для стиля */
+            --accent: #e11d2a;
+            --text: #ffffff;
+            --success: #2ecc71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* ФОНОВОЕ ИЗОБРАЖЕНИЕ */
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
+                url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            
+            color: var(--text);
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1 { 
+            font-size: 28px; 
+            margin: 20px 0; 
+            letter-spacing: 3px; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+
+        /* СЕТКА КАРТОЧЕК */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; width: 100%; max-width: 900px;
+            padding-bottom: 40px;
+        }
+
+        @media (min-width: 600px) {
+            .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        }
+
+        .card {
+            aspect-ratio: 3/4;
+            background: var(--card-inner);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.3s;
+            position: relative; text-align: center; padding: 5px;
+            backdrop-filter: blur(5px); /* Размытие под карточкой */
+        }
+
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .card:active { transform: scale(0.95); }
+        
+        .card.solved { 
+            border-color: var(--success); 
+            background: rgba(10, 46, 26, 0.9); 
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .card .q { font-size: 36px; color: rgba(255,255,255,0.2); font-weight: bold; }
+        .card .num { font-size: 12px; color: #888; margin-top: 5px; }
+        .card .player-name { font-size: 13px; font-weight: bold; word-break: break-word; color: var(--success); }
+
+        /* МОДАЛЬНОЕ ОКНО */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 10000; backdrop-filter: blur(8px);
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            width: 95%; max-width: 450px; height: 85vh;
+            background: #181818; border-radius: 24px;
+            border: 1px solid #333; padding: 25px;
+            display: flex; flex-direction: column;
+            position: relative; box-sizing: border-box;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .close-btn {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 35px; color: #666; cursor: pointer; line-height: 1;
+        }
+
+        /* ВВОД И ПОДСКАЗКИ */
+        .input-group { position: relative; width: 100%; margin: 15px 0; }
+        
+        input {
+            width: 100%; padding: 16px; background: #222;
+            border: 2px solid #333; border-radius: 14px;
+            color: white; font-size: 16px; outline: none;
+            box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); background: #282828; }
+
+        .suggests {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #282828; border: 1px solid #444;
+            border-radius: 0 0 14px 14px; max-height: 200px;
+            overflow-y: auto; z-index: 100; display: none;
+        }
+
+        .suggest-item { padding: 14px; border-bottom: 1px solid #333; cursor: pointer; }
+        .suggest-item:hover { background: #333; }
+
+        /* ИСТОРИЯ */
+        .history {
+            flex-grow: 1; overflow-y: auto;
+            margin-top: 15px; padding-right: 5px;
+        }
+
+        .hist-item {
+            background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px;
+            margin-bottom: 10px; display: flex; justify-content: space-between;
+            border-left: 5px solid #ccc; font-weight: bold; font-size: 15px;
+        }
+
+        .btn-guess {
+            width: 100%; padding: 18px; background: var(--accent);
+            color: white; border: none; border-radius: 14px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px;
+                    /* СТИЛИ ДЛЯ КАРТИНКИ В КАРТОЧКЕ */
+        .card-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Картинка заполнит всё пространство без искажений */
+            z-index: 1;
+        }
+
+        /* Контейнер для текста поверх картинки */
+        .card-overlay {
+            position: relative;
+            z-index: 2; /* Текст будет выше картинки */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Номер будет внизу */
+            align-items: center;
+            padding-bottom: 10px;
+            /* Градиент снизу, чтобы номер было лучше видно на светлых фото */
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 40%);
+            box-sizing: border-box;
+        }
+
+        .card .num {
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Если карточка разгадана, убираем эффект градиента */
+        .card.solved .card-overlay {
+            background: none;
+            justify-content: center;
+        }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Угадай футболиста</h1>
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle" style="margin-top:0">Карточка</h2>
+        
+        <div class="input-group">
+            <input type="text" id="pInput" placeholder="Имя футболиста..." autocomplete="off">
+            <div id="suggests" class="suggests"></div>
+        </div>
+
+        <button class="btn-guess" onclick="makeGuess()">УГАДАТЬ</button>
+
+        <div class="history" id="history"></div>
+    </div>
+</div>
+
+<script>
+    const players = [
+        { n: "Килиан Мбаппе", c: "Франция", t: ["Реал Мадрид", "ПСЖ"], p: "Нападающий" },
+        { n: "Лионель Месси", c: "Аргентина", t: ["Интер Майами", "Барселона"], p: "Нападающий" },
+        { n: "Эрлинг Холланд", c: "Норвегия", t: ["Ман Сити", "Боруссия Д"], p: "Нападающий" },
+        { n: "Винисиус Жуниор", c: "Бразилия", t: ["Реал Мадрид"], p: "Нападающий" },
+        { n: "Педри", c: "Испания", t: ["Барселона"], p: "Полузащитник" },
+        { n: "Алиссон Беккер", c: "Бразилия", t: ["Ливерпуль", "Рома"], p: "Вратарь" },
+        { n: "Джуд Беллингем", c: "Англия", t: ["Реал Мадрид", "Боруссия Д"], p: "Полузащитник" },
+        { n: "Кевин Де Брюйне", c: "Бельгия", t: ["Ман Сити", "Челси"], p: "Полузащитник" },
+        { n: "Мохаммед Салах", c: "Египет", t: ["Ливерпуль", "Рома", "Челси"], p: "Нападающий" },
+        { n: "Роберт Левандовски", c: "Польша", t: ["Барселона", "Бавария"], p: "Нападающий" },
+        { n: "Лука Модрич", c: "Хорватия", t: ["Реал Мадрид", "Тоттенхэм"], p: "Полузащитник" },
+        { n: "Букайо Сака", c: "Англия", t: ["Арсенал"], p: "Нападающий" }
+    ];
+
+    let gameCards = [];
+    let activeIndex = null;
+
+    function initGame() {
+        gameCards = [];
+        // Создаем 12 уникальных карточек (если игроков хватит)
+        let shuffled = [...players].sort(() => 0.5 - Math.random());
+        for(let i=0; i<12; i++) {
+            let secret = shuffled[i % shuffled.length];
+            gameCards.push({
+                id: i + 1,
+                secret: secret,
+                solved: false,
+                attempts: [],
+                ranks: calculateAllRanks(secret)
+            });
+        }
+        renderGrid();
+    }
+
+    function calculateAllRanks(secretPlayer) {
+        return players.map(p => {
+            let pts = 0;
+            if (p.n === secretPlayer.n) pts += 10000;
+            if (p.c === secretPlayer.c) pts += 800;
+            if (p.p === secretPlayer.p) pts += 100;
+            const commonClubs = p.t.filter(club => secretPlayer.t.includes(club));
+            pts += (commonClubs.length * 1000);
+            return { name: p.n, pts: pts + (p.n.length * 0.01) };
+        }).sort((a, b) => b.pts - a.pts).map(x => x.name);
+    }
+
+       function renderGrid() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        
+        gameCards.forEach((card, i) => {
+            const d = document.createElement('div');
+            d.className = `card ${card.solved ? 'solved' : ''}`;
+            
+            if (card.solved) {
+                // Если угадано — показываем имя игрока
+                d.innerHTML = `
+                    <div class="card-overlay">
+                        <div class="player-name">${card.secret.n}</div>
+                    </div>
+                `;
+            } else {
+                // Если не угадано — картинка + номер
+                // ВНИМАНИЕ: Если переименуешь файл в bg1.jpg, измени путь ниже!
+                d.innerHTML = `
+                    <img src="bg1.jpg" class="card-img" onerror="this.style.display='none'">
+                    <div class="card-overlay">
+                        <div class="num">#${card.id}</div>
+                    </div>
+                `;
+            }
+            
+            d.onclick = () => openModal(i);
+            grid.appendChild(d);
+        });
+    }
+    function openModal(i) {
+        activeIndex = i;
+        document.getElementById('modalTitle').innerText = `Карточка #${gameCards[i].id}`;
+        document.getElementById('modal').classList.add('active');
+        document.getElementById('pInput').focus();
+        renderHistory();
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('active');
+        document.getElementById('suggests').style.display = 'none';
+        document.getElementById('pInput').value = '';
+    }
+
+    // Закрытие по клику на фон
+    document.getElementById('modal').onclick = closeModal;
+
+    const input = document.getElementById('pInput');
+    const suggests = document.getElementById('suggests');
+
+    input.addEventListener('input', () => {
+        const val = input.value.toLowerCase();
+        suggests.innerHTML = '';
+        if (val.length < 2) { suggests.style.display = 'none'; return; }
+
+        const matches = players.filter(p => p.n.toLowerCase().includes(val)).slice(0, 5);
+        matches.forEach(m => {
+            const d = document.createElement('div');
+            d.className = 'suggest-item';
+            d.innerText = m.n;
+            d.onclick = () => { input.value = m.n; suggests.style.display = 'none'; makeGuess(); };
+            suggests.appendChild(d);
+        });
+        suggests.style.display = matches.length ? 'block' : 'none';
+    });
+
+    // Обработка Enter
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') makeGuess();
+    });
+
+    function makeGuess() {
+        const name = input.value;
+        const player = players.find(p => p.n === name);
+        if (!player || activeIndex === null) return;
+
+        const card = gameCards[activeIndex];
+        if (card.solved) return;
+
+        const rank = card.ranks.indexOf(player.n) + 1;
+        // Более плавная палитра от красного (1) к синему (max)
+        let hue = Math.min(240, (rank - 1) * (240 / Math.min(players.length, 50))); 
+        let color = `hsl(${hue}, 80%, 45%)`;
+        let emoji = rank === 1 ? "🏆" : (rank <= 10 ? "🔥" : "🧊");
+
+        if (!card.attempts.find(a => a.name === player.n)) {
+            card.attempts.push({ name: player.n, rank, color, emoji });
+        }
+
+        if (rank === 1) {
+            card.solved = true;
+            renderGrid();
+            setTimeout(() => { closeModal(); }, 500);
+        }
+
+        renderHistory();
+        input.value = '';
+        suggests.style.display = 'none';
+    }
+
+    function renderHistory() {
+        const hDiv = document.getElementById('history');
+        hDiv.innerHTML = '';
+        const card = gameCards[activeIndex];
+        if (!card) return;
+        
+        [...card.attempts].sort((a,b) => a.rank - b.rank).forEach(a => {
+            const d = document.createElement('div');
+            d.className = 'hist-item';
+            d.style.color = a.color; d.style.borderLeftColor = a.color;
+            d.innerHTML = `<span>${a.name}</span> <span>${a.emoji} ${a.rank}</span>`;
+            hDiv.appendChild(d);
+        });
+    }
+
+    initGame();
+</script>
+</body>
