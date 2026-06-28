@@ -61,38 +61,80 @@
             .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } /* 4 колонки на ПК */
         }
 
-               .card {
+                     /* КАРТОЧКА */
+        .card {
             aspect-ratio: 3/4;
             background: var(--card-inner);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; transition: 0.3s;
-            position: relative; 
-            overflow: hidden; /* Важно: чтобы картинка не вылезала за скругленные углы */
-        }
-
-        .card-img {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover; /* Картинка заполнит карточку, сохраняя свои пропорции */
-            opacity: 0.6; /* Немного приглушим яркость, чтобы не резало глаз */
-            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
         .card:hover { transform: translateY(-5px); border-color: var(--accent); }
         .card:active { transform: scale(0.95); }
-        
-        .card.solved { 
-            border-color: var(--success); 
-            background: rgba(10, 46, 26, 0.9); 
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+
+        /* КАРТИНКА ВНУТРИ */
+        .card-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.6;
         }
-        
-        .card .q { font-size: 36px; color: rgba(255,255,255,0.2); font-weight: bold; }
-        .card .num { font-size: 12px; color: #888; margin-top: 5px; }
-        .card .player-name { font-size: 13px; font-weight: bold; word-break: break-word; color: var(--success); }
+
+        /* ОВЕРЛЕЙ ДЛЯ ТЕКСТА (ГРАДИЕНТ И ПОЗИЦИЯ) */
+        .card-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        /* Если НЕ разгадано: номер ВНИЗУ */
+        .card:not(.solved) .card-overlay {
+            justify-content: flex-end;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+        }
+
+        /* Если РАЗГАДАНО: имя по ЦЕНТРУ */
+        .card.solved .card-overlay {
+            justify-content: center;
+            background: rgba(10, 46, 26, 0.85);
+        }
+
+        /* ЖИРНЫЙ ШРИФТ ДЛЯ НОМЕРА */
+        .card .num {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            font-family: 'Arial Black', Gadget, sans-serif;
+            margin-bottom: 5px;
+        }
+
+        /* ИМЯ ИГРОКА */
+        .card .player-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--success);
+            text-align: center;
+            text-transform: uppercase;
+            line-height: 1.2;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
 
         /* МОДАЛЬНОЕ ОКНО */
         .modal {
@@ -102,7 +144,6 @@
             display: none; justify-content: center; align-items: center;
             z-index: 10000; backdrop-filter: blur(8px);
         }
-
         .modal.active { display: flex; }
 
         .modal-content {
@@ -120,8 +161,6 @@
         }
 
         /* ВВОД И ПОДСКАЗКИ */
-        .input-group { position: relative; width: 100%; margin: 15px 0; }
-        
         input {
             width: 100%; padding: 16px; background: #222;
             border: 2px solid #333; border-radius: 14px;
@@ -136,16 +175,9 @@
             border-radius: 0 0 14px 14px; max-height: 200px;
             overflow-y: auto; z-index: 100; display: none;
         }
-
         .suggest-item { padding: 14px; border-bottom: 1px solid #333; cursor: pointer; }
-        .suggest-item:hover { background: #333; }
 
-        /* ИСТОРИЯ */
-        .history {
-            flex-grow: 1; overflow-y: auto;
-            margin-top: 15px; padding-right: 5px;
-        }
-
+        .history { flex-grow: 1; overflow-y: auto; margin-top: 15px; }
         .hist-item {
             background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px;
             margin-bottom: 10px; display: flex; justify-content: space-between;
@@ -157,17 +189,7 @@
             color: white; border: none; border-radius: 14px;
             font-size: 16px; font-weight: bold; cursor: pointer;
             text-transform: uppercase; letter-spacing: 1px;
-                    /* СТИЛИ ДЛЯ КАРТИНКИ В КАРТОЧКЕ */
-        .card-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Картинка заполнит всё пространство без искажений */
-            z-index: 1;
         }
-
               /* Контейнер для текста поверх картинки */
         .card-overlay {
             position: absolute;
