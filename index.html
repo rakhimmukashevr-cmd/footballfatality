@@ -159,7 +159,29 @@
             position: absolute; top: 15px; right: 20px;
             font-size: 35px; color: #666; cursor: pointer; line-height: 1;
         }
+        /* 1. ЭТОТ БЛОК ПРИВЯЗЫВАЕТ ПОДСКАЗКИ К ПОЛЮ ВВОДА */
+        .input-group { 
+            position: relative; 
+            width: 100%; 
+            margin: 15px 0; 
+        }
 
+        /* 2. ЭТОТ БЛОК УПРАВЛЯЕТ ВЫПАДАЮЩИМ СПИСКОМ */
+        .suggests {
+            position: absolute;
+            top: 100%; /* Появляется ровно под инпутом */
+            left: 0;
+            right: 0;
+            background: #282828;
+            border: 1px solid #444;
+            border-top: none;
+            border-radius: 0 0 14px 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999; /* Чтобы список был поверх всего */
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
         /* ВВОД И ПОДСКАЗКИ */
         input {
             width: 100%; padding: 16px; background: #222;
