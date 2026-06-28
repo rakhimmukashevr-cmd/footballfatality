@@ -13,20 +13,20 @@
             --success: #2ecc71;
         }
 
-        body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    /* Убрали fixed, добавили более стабильный скролл для мобилок */
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-        url('bg.jpg') no-repeat center center;
-    background-attachment: scroll; /* Это лучше для телефонов */
-    background-size: cover;
-    
-    color: var(--text);
-    margin: 0; padding: 10px;
-    display: flex; flex-direction: column; align-items: center;
-    min-height: 100vh;
-}
+               body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* ТВОЯ ССЫЛКА НА ФОН СТАДИОНА */
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
+                url('https://ss.sport-express.net/userfiles/materials/155/1553108/volga.jpg') no-repeat center center;
+            background-size: cover;
+            background-attachment: scroll; /* Для стабильности на мобилках */
+            
+            color: var(--text);
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
 
         h1 { 
             font-size: 28px; 
@@ -246,7 +246,7 @@
         }).sort((a, b) => b.pts - a.pts).map(x => x.name);
     }
 
-       function renderGrid() {
+          function renderGrid() {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
         
@@ -255,17 +255,15 @@
             d.className = `card ${card.solved ? 'solved' : ''}`;
             
             if (card.solved) {
-                // Если угадано — показываем имя игрока
                 d.innerHTML = `
                     <div class="card-overlay">
                         <div class="player-name">${card.secret.n}</div>
                     </div>
                 `;
             } else {
-                // Если не угадано — картинка + номер
-                // ВНИМАНИЕ: Если переименуешь файл в bg1.jpg, измени путь ниже!
+                // ТВОЯ ССЫЛКА НА ИКОНКУ КАРТОЧКИ
                 d.innerHTML = `
-                    <img src="bg1.jpg" class="card-img" onerror="this.style.display='none'">
+                    <img src="https://thumbs.dreamstime.com/b/none-163315936.jpg?w=768" class="card-img" onerror="this.style.display='none'">
                     <div class="card-overlay">
                         <div class="num">#${card.id}</div>
                     </div>
@@ -296,23 +294,23 @@
     const input = document.getElementById('pInput');
     const suggests = document.getElementById('suggests');
 
-    input.addEventListener('input', () => {
-    const val = input.value.toLowerCase();
-    suggests.innerHTML = '';
-    if (val.length < 2) { suggests.style.display = 'none'; return; }
+       input.addEventListener('input', () => {
+        const val = input.value.toLowerCase();
+        suggests.innerHTML = '';
+        if (val.length < 2) { suggests.style.display = 'none'; return; }
 
-    // ИЗМЕНЕНО: теперь берем только 2 первых совпадения
-    const matches = players.filter(p => p.n.toLowerCase().includes(val)).slice(0, 2);
-    
-    matches.forEach(m => {
-        const d = document.createElement('div');
-        d.className = 'suggest-item';
-        d.innerText = m.n;
-        d.onclick = () => { input.value = m.n; suggests.style.display = 'none'; makeGuess(); };
-        suggests.appendChild(d);
+        // ОГРАНИЧЕНИЕ: .slice(0, 2) — берем только 2 первых совпадения
+        const matches = players.filter(p => p.n.toLowerCase().includes(val)).slice(0, 2);
+        
+        matches.forEach(m => {
+            const d = document.createElement('div');
+            d.className = 'suggest-item';
+            d.innerText = m.n;
+            d.onclick = () => { input.value = m.n; suggests.style.display = 'none'; makeGuess(); };
+            suggests.appendChild(d);
+        });
+        suggests.style.display = matches.length ? 'block' : 'none';
     });
-    suggests.style.display = matches.length ? 'block' : 'none';
-});
     // Обработка Enter
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') makeGuess();
