@@ -13,19 +13,28 @@
             --success: #2ecc71;
         }
 
-               body {
+                     body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            /* ТВОЯ ССЫЛКА НА ФОН СТАДИОНА */
-            background: 
-                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
-                url('https://ss.sport-express.net/userfiles/materials/155/1553108/volga.jpg') no-repeat center center;
-            background-size: cover;
-            background-attachment: scroll; /* Для стабильности на мобилках */
-            
-            color: var(--text);
             margin: 0; padding: 10px;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
+            color: var(--text);
+
+            /* ИСПРАВЛЕННЫЙ ФОН */
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
+                url('https://ss.sport-express.net/userfiles/materials/155/1553108/volga.jpg');
+            background-position: center center; /* Центрируем */
+            background-repeat: no-repeat;
+            background-size: cover; /* Картинка заполняет всё пространство */
+            background-attachment: fixed; /* Фон не двигается, создавая эффект глубины */
+        }
+
+        /* Специальный фикс для мобилок, чтобы фон не прыгал при скролле */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+            }
         }
 
         h1 { 
@@ -37,26 +46,39 @@
         }
 
         /* СЕТКА КАРТОЧЕК */
-        .grid {
+              .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 12px; width: 100%; max-width: 900px;
+            grid-template-columns: repeat(2, 1fr); /* 2 колонки на совсем маленьких экранах */
+            gap: 10px; width: 100%; max-width: 900px;
             padding-bottom: 40px;
         }
 
-        @media (min-width: 600px) {
-            .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        @media (min-width: 400px) {
+            .grid { grid-template-columns: repeat(3, 1fr); } /* 3 колонки на обычных смартфонах */
         }
 
-        .card {
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } /* 4 колонки на ПК */
+        }
+
+               .card {
             aspect-ratio: 3/4;
             background: var(--card-inner);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: 0.3s;
-            position: relative; text-align: center; padding: 5px;
-            backdrop-filter: blur(5px); /* Размытие под карточкой */
+            position: relative; 
+            overflow: hidden; /* Важно: чтобы картинка не вылезала за скругленные углы */
+        }
+
+        .card-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; /* Картинка заполнит карточку, сохраняя свои пропорции */
+            opacity: 0.6; /* Немного приглушим яркость, чтобы не резало глаз */
+            z-index: 1;
         }
 
         .card:hover { transform: translateY(-5px); border-color: var(--accent); }
