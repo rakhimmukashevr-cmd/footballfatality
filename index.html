@@ -14,19 +14,19 @@
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            /* ФОНОВОЕ ИЗОБРАЖЕНИЕ */
-            background: 
-                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
-                url('bg.jpg') no-repeat center center fixed;
-            background-size: cover;
-            
-            color: var(--text);
-            margin: 0; padding: 10px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
-            -webkit-tap-highlight-color: transparent;
-        }
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* Убрали fixed, добавили более стабильный скролл для мобилок */
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+        url('bg.jpg') no-repeat center center;
+    background-attachment: scroll; /* Это лучше для телефонов */
+    background-size: cover;
+    
+    color: var(--text);
+    margin: 0; padding: 10px;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+}
 
         h1 { 
             font-size: 28px; 
@@ -297,21 +297,22 @@
     const suggests = document.getElementById('suggests');
 
     input.addEventListener('input', () => {
-        const val = input.value.toLowerCase();
-        suggests.innerHTML = '';
-        if (val.length < 2) { suggests.style.display = 'none'; return; }
+    const val = input.value.toLowerCase();
+    suggests.innerHTML = '';
+    if (val.length < 2) { suggests.style.display = 'none'; return; }
 
-        const matches = players.filter(p => p.n.toLowerCase().includes(val)).slice(0, 5);
-        matches.forEach(m => {
-            const d = document.createElement('div');
-            d.className = 'suggest-item';
-            d.innerText = m.n;
-            d.onclick = () => { input.value = m.n; suggests.style.display = 'none'; makeGuess(); };
-            suggests.appendChild(d);
-        });
-        suggests.style.display = matches.length ? 'block' : 'none';
+    // ИЗМЕНЕНО: теперь берем только 2 первых совпадения
+    const matches = players.filter(p => p.n.toLowerCase().includes(val)).slice(0, 2);
+    
+    matches.forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'suggest-item';
+        d.innerText = m.n;
+        d.onclick = () => { input.value = m.n; suggests.style.display = 'none'; makeGuess(); };
+        suggests.appendChild(d);
     });
-
+    suggests.style.display = matches.length ? 'block' : 'none';
+});
     // Обработка Enter
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') makeGuess();
